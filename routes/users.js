@@ -9,13 +9,26 @@ router.get('/', authMiddleware, async (req, res, next) => {
         const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 5;
         const offset = (page - 1) * limit;
+        const search = req.query.search || '';
+
+        // 허용할 컬럼 화이트리스트
+        const allowedSort = ['id', 'name', 'age', 'email'];
+        const allowedOrder = ['ASC', 'DESC'];
+
+        const sort = allowedSort.includes(req.query.sort) ? req.query.sort : 'id';
+        const order = allowedOrder.includes(req.query.order?.toUpperCase()) ? req.query.order.toUpperCase() : 'ASC';
 
         const result = await pool.query(
-            'SELECT id, name, age, email FROM users ORDER BY id LIMIT $1 OFFSET $2',
-            [limit, offset]
+            `SELECT id, name, age, email FROM users 
+             WHERE name LIKE $1 OR email LIKE $1
+             ORDER BY ${sort} ${order} LIMIT $2 OFFSET $3`,
+            [`%${search}%`, limit, offset]
         );
 
-        const total = await pool.query('SELECT COUNT(*) FROM users');
+        const total = await pool.query(
+            'SELECT COUNT(*) FROM users WHERE name LIKE $1 OR email LIKE $1',
+            [`%${search}%`]
+        );
 
         res.json({
             유저목록: result.rows,
