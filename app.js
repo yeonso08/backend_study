@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const usersRouter = require('./routes/users');
 const authRouter = require('./routes/auth');
+const postsRouter = require('./routes/posts')
 const cors = require('cors');
 const path = require('path');
 
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
 // 라우터 등록
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
+app.use('/posts', postsRouter);
 
 // 에러 핸들링 미들웨어
 app.use((err, req, res, next) => {
