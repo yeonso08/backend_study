@@ -6,8 +6,23 @@ const authMiddleware = require('../middleware/auth');
 // 전체 유저 조회
 router.get('/', authMiddleware, async (req, res, next) => {
     try {
-        const result = await pool.query('SELECT id, name, age, email FROM users');
-        res.json(result.rows);
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 5;
+        const offset = (page - 1) * limit;
+
+        const result = await pool.query(
+            'SELECT id, name, age, email FROM users ORDER BY id LIMIT $1 OFFSET $2',
+            [limit, offset]
+        );
+
+        const total = await pool.query('SELECT COUNT(*) FROM users');
+
+        res.json({
+            유저목록: result.rows,
+            현재페이지: page,
+            총유저수: Number(total.rows[0].count),
+            총페이지수: Math.ceil(Number(total.rows[0].count) / limit)
+        });
     } catch (error) {
         next(error);
     }
