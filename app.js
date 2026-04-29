@@ -3,6 +3,7 @@ const app = express();
 const usersRouter = require('./routes/users');
 const authRouter = require('./routes/auth');
 const cors = require('cors');
+const path = require('path');
 
 app.use(cors({
     origin: process.env.CLIENT_URL, // 프론트 주소
@@ -27,6 +28,9 @@ app.use((err, req, res, next) => {
     console.error(err.message);
     res.status(500).json({ 메시지: '서버 에러', 에러: err.message });
 });
+
+// 정적 파일 서빙
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.listen(3000, () => {
     console.log('서버 시작! http://localhost:3000');

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const authMiddleware = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 // 전체 유저 조회
 router.get('/', authMiddleware, async (req, res, next) => {
@@ -115,6 +116,25 @@ router.get('/me', authMiddleware, async (req, res, next) => {
             'SELECT id, name, age, email FROM users WHERE id = $1',
             [req.user.id]
         );
+        res.json(result.rows[0]);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// 프로필 이미지 업로드
+router.post('/:id/upload', authMiddleware, upload.single('image'), async (req, res, next) => {
+    try {
+        if (!req.file) return res.status(400).json({ 메시지: '파일이 없습니다' });
+
+        const { id } = req.params;
+        const imageUrl = `/uploads/${req.file.filename}`;
+
+        const result = await pool.query(
+            'UPDATE users SET profile_image = $1 WHERE id = $2 RETURNING id, name, email, profile_image',
+            [imageUrl, id]
+        );
+
         res.json(result.rows[0]);
     } catch (error) {
         next(error);
