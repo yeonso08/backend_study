@@ -1,12 +1,12 @@
+require('dotenv').config();
 const { Pool } = require('pg');
 
-// DB 연결 설정
 const pool = new Pool({
-    host: 'localhost',      // DB 주소
-    port: 5432,             // PostgreSQL 기본 포트
-    database: 'backend_study', // 아까 만든 DB 이름
-    user: 'postgres',       // DB 유저
-    password: '734752Wodus*', // PostgreSQL 설치할 때 설정한 비밀번호
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    database: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
 });
 
 module.exports = pool;

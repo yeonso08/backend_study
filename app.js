@@ -1,6 +1,14 @@
 const express = require('express');
 const app = express();
 const usersRouter = require('./routes/users');
+const authRouter = require('./routes/auth');
+const cors = require('cors');
+
+app.use(cors({
+    origin: process.env.CLIENT_URL, // 프론트 주소
+    credentials: true                // 쿠키, 인증 헤더 허용
+}));
+
 
 app.use(express.json());
 
@@ -12,6 +20,7 @@ app.use((req, res, next) => {
 
 // 라우터 등록
 app.use('/users', usersRouter);
+app.use('/auth', authRouter);
 
 // 에러 핸들링 미들웨어
 app.use((err, req, res, next) => {
