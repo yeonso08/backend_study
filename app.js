@@ -2,8 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { ApolloServer } = require('apollo-server-express');
+const { mergeTypeDefs, mergeResolvers } = require('@graphql-tools/merge');
 const typeDefs = require('./graphql/schema');
+const userTypeDefs = require('./graphql/userSchema');
 const resolvers = require('./graphql/resolvers');
+const userResolvers = require('./graphql/userResolvers');
 const jwt = require('jsonwebtoken');
 const app = express();
 const usersRouter = require('./routes/users');
@@ -39,9 +42,12 @@ app.use((err, req, res, next) => {
 
 // GraphQL 서버 시작
 async function startServer() {
+    const mergedTypeDefs = mergeTypeDefs([typeDefs, userTypeDefs]);
+    const mergedResolvers = mergeResolvers([resolvers, userResolvers]);
+
     const apolloServer = new ApolloServer({ 
-        typeDefs, 
-        resolvers,
+        typeDefs: mergedTypeDefs, 
+        resolvers: mergedResolvers,
         context: ({ req }) => {
             const token = req.headers.authorization?.split(' ')[1];
             if (token) {
@@ -55,13 +61,14 @@ async function startServer() {
             return {};
         }
     });
+
     await apolloServer.start();
     apolloServer.applyMiddleware({ 
         app, 
         path: '/graphql',
         cors: false
     });
-    
+
     app.listen(3000, () => {
         console.log('서버 시작! http://localhost:3000');
         console.log('GraphQL: http://localhost:3000/graphql');
