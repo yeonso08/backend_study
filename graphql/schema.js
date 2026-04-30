@@ -14,6 +14,7 @@ const typeDefs = gql`
         content: String
         user_id: Int
         created_at: String
+        user: User
     }
 
     type Query {
@@ -24,7 +25,9 @@ const typeDefs = gql`
     }
 
     type Mutation {
-        createPost(title: String!, content: String!, user_id: Int!): Post
+        createPost(title: String!, content: String!): Post
+        updatePost(id: Int!, title: String!, content: String!): Post
+        deletePost(id: Int!): String
     }
 `;
 
